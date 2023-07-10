@@ -6,17 +6,17 @@
      submissionType="IETF"
      consensus="true"
      category="std"
-     docName="draft-tuexen-tsvwg-rfc6083-bis-01"
+     docName="draft-tuexen-tsvwg-rfc6083-bis-02"
      obsoletes="6083"
      version="3"
-     tocDepth="1">
+     tocDepth="2">
 
 <front>
-<title abbrev="DTLS for SCTP">
-       Datagram Transport Layer Security (DTLS)
+<title abbrev="DTLS 1.3 for SCTP">
+       Datagram Transport Layer Security (DTLS) 1.3
        for Stream Control Transmission Protocol (SCTP)
 </title>
-<seriesInfo name="Internet-Draft" value="draft-tuexen-tsvwg-rfc6083-bis-01"/>
+<seriesInfo name="Internet-Draft" value="draft-tuexen-tsvwg-rfc6083-bis-02"/>
 
 <!-- ************** MICHAEL TUEXEN *************** -->
 <author initials="M." surname="Tüxen" fullname="Michael Tüxen">
@@ -32,44 +32,23 @@
 </address>
 </author>
 
-<!-- ************** ROBIN SEGGELMANN *************** -->
-<author initials="R." surname="Seggelmann" fullname="Robin Seggelmann">
-<organization abbrev="Muenster Univ. of Applied Sciences">
-              Muenster University of Applied Sciences</organization>
+<!-- ************** HANNES TSCHOFENIG *************** -->
+<author initials="H." surname="Tschofenig" fullname="Hannes Tschofenig">
 <address>
-    <postal>
-        <street>Stegerwaldstr. 39</street>
-        <city>48565 Steinfurt</city>
-        <country>Germany</country>
-    </postal>
-    <email>seggelmann@fh-muenster.de</email>
+    <email>hannes.tschofenig@gmx.net</email>
 </address>
 </author>
-
-<!-- ************** ERIC RESCORLA *************** -->
-<author initials="E." surname="Rescorla" fullname="Eric Rescorla">
-<organization>RTFM, Inc.</organization>
-<address>
-    <postal>
-        <street>2064 Edgewood Drive</street>
-        <city>Palo Alto, CA 94303</city>
-        <country>USA</country>
-    </postal>
-    <email>ekr@networkresonance.com</email>
-</address>
-</author>
-
 <date/>
 
 <abstract>
 <t>This document describes the usage of the Datagram Transport Layer
-Security (DTLS) protocol over the Stream Control Transmission
+Security (DTLS) 1.3 protocol over the Stream Control Transmission
 Protocol (SCTP).</t>
-<t>DTLS over SCTP provides communications privacy for applications that
+<t>DTLS 1.3 over SCTP provides communications privacy for applications that
 use SCTP as their transport protocol and allows client/server applications to
 communicate in a way that is designed to prevent eavesdropping and
 detect tampering or message forgery.</t>
-<t>Applications using DTLS over SCTP can use almost all transport
+<t>Applications using DTLS 1.3 over SCTP can use almost all transport
 features provided by SCTP and its extensions.</t>
 </abstract>
 
@@ -78,13 +57,16 @@ features provided by SCTP and its extensions.</t>
 <middle>
 <section>
 <name>Introduction</name>
-<section>
-<name>Overview</name>
 <t>This document describes the usage of the Datagram Transport Layer
-Security (DTLS) protocol, as defined in
-<xref target='RFC4347'/>, over the
+Security (DTLS) 1.3 protocol, as defined in
+<xref target='RFC9147'/>, over the
 Stream Control Transmission Protocol (SCTP), as defined in
-<xref target='RFC4960'/>.</t>
+<xref target='RFC9260'/>.</t>
+
+<t>Prior versions of DTLS are out of scope for this document.
+The use of DTLS 1.0 is described in <xref target='RFC6083'/>.
+For the rest of the document we assume version 1.3 when referring to DTLS
+unless the context requires it to refer to a dedicated version.</t>
 
 <t>DTLS over SCTP provides communications privacy for applications that
 use SCTP as their transport protocol and allows client/server applications to
@@ -95,16 +77,13 @@ features provided by SCTP and its extensions.</t>
 
 <t>TLS, from which DTLS was derived, is designed to run on top of a
 byte-stream-oriented transport protocol providing a reliable,
-in-sequence delivery.
-Thus, TLS is currently mainly being used on top of the Transmission Control
-Protocol (TCP), as defined in <xref target='RFC0793'/>.</t>
+in-sequence delivery.</t>
 
-<t>TLS over SCTP as described in <xref target='RFC3436'/>
-has some serious limitations:</t>
+<t>TLS over SCTP, as described in <xref target='RFC3436'/>, has limitations:</t>
 <ul>
 <li><t>It does not support the unordered delivery of SCTP user
  messages.</t></li>
-<li><t>It does not support partial reliability as defined in
+<li><t>It does not support partial reliability, as defined in
 <xref target='RFC3758'/>.</t></li>
 <li><t>It only supports the usage of the same number of streams in both
 directions.</t></li>
@@ -113,34 +92,66 @@ a substantial amount of resources and message exchanges if a large number
 of streams is used.</t></li>
 </ul>
 
-<t>DTLS over SCTP as described in this document overcomes these limitations
-of TLS over SCTP. In particular, DTLS/SCTP supports:</t>
+<t>DTLS over SCTP, as described in this document, overcomes these limitations
+of TLS over SCTP.
+This specification supports:</t>
 <ul>
 <li><t>preservation of message boundaries.</t></li>
 <li><t>a large number of unidirectional and bidirectional streams.</t></li>
 <li><t>ordered and unordered delivery of SCTP user messages.</t></li>
-<li><t>the partial reliability extension as defined in
+<li><t>the partial reliability extension, as defined in
 <xref target='RFC3758'/>.</t></li>
-<li><t>the dynamic address reconfiguration extension as defined in
+<li><t>the dynamic address reconfiguration extension, as defined in
 <xref target='RFC5061'/>.</t></li>
 </ul>
-
-<t>However, the following limitations still apply:</t>
+<t>The list above matches the design of DTLS over SCTP based on
+<xref target='RFC6083'/>.
+This specification relaxes the message size limitation:</t>
 <ul>
-<li><t>The maximum user message size is 2<sup>14</sup> bytes, which is the DTLS
-limit.</t></li>
+<li><t>The TLS protocol imposes a limit on the maximum record size, which is
+2<sup>14</sup> bytes although the length field of the protocol allows
+messages of 2<sup>16</sup> - 1 bytes.
+The record limit extension does, however, allow extensions to extend the
+maximum record size beyond 2<sup>14</sup> bytes.
+This document is such an extension and offers messages of 2<sup>16</sup> - 1
+bytes.</t></li>
+</ul>
+<t>However, the following limitation still apply:</t>
+<ul>
 <li><t>The DTLS user cannot perform the SCTP-AUTH key management
 because this is done by the DTLS layer.</t></li>
 </ul>
+<t>DTLS establishes session keys for SCTP-AUTH in the same style as
+<xref target='RFC5763'/> defines how DTLS establishes keys for SRTP.
+This specification utilizes a new version of SCTP-AUTH, described in
+<xref target='I-D.tuexen-tsvwg-rfc4895-bis'/> utilizing modern cryptographic
+algorithms.</t>
 
 <t>The method described in this document requires that the SCTP implementation
 supports the optional feature of fragmentation of SCTP user messages as
-defined in <xref target='RFC4960'/> and the SCTP authentication extension
-defined in <xref target='RFC4895'/>.</t>
+defined in <xref target='RFC9260'/> and the SCTP authentication extension
+defined in <xref target='I-D.tuexen-tsvwg-rfc4895-bis'/>.</t>
+<t>The design of this specification is based on the following principles:</t>
+<ul>
+<li><t>Re-use RFC 6083 as much as possible.  Large parts of RFC 6083 are
+re-used.</t></li>
+<li><t>Focus of DTLS 1.3 and use its features and extensions.</t></li>
+<li><t>Minimize the implementation effort.</t></li>
+<li><t>Re-use the SCTP-AUTH extension but utilize a modernized version.</t></li>
+</ul>
 </section>
 
 <section>
-<name>Terminology</name>
+<name>Conventions and Terminology</name>
+<t>The key words "<bcp14>MUST</bcp14>", "<bcp14>MUST NOT</bcp14>",
+"<bcp14>REQUIRED</bcp14>", "<bcp14>SHALL</bcp14>", "<bcp14>SHALL NOT</bcp14>",
+"<bcp14>SHOULD</bcp14>", "<bcp14>SHOULD NOT</bcp14>",
+"<bcp14>RECOMMENDED</bcp14>", "<bcp14>NOT RECOMMENDED</bcp14>",
+"<bcp14>MAY</bcp14>", and "<bcp14>OPTIONAL</bcp14>" in this document are to
+be interpreted as described in
+BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
+
 <t>This document uses the following terms:</t>
 <dl>
 <dt>Association:</dt>
@@ -149,10 +160,8 @@ defined in <xref target='RFC4895'/>.</t>
 <dd><t>A unidirectional stream of an SCTP association.
 It is uniquely identified by a stream identifier.</t></dd>
 </dl>
-</section>
 
-<section>
-<name>Abbreviations</name>
+<t>This document uses the following terms:</t>
 <dl>
 <dt>DTLS:</dt>
 <dd><t>Datagram Transport Layer Security</t></dd>
@@ -168,58 +177,104 @@ It is uniquely identified by a stream identifier.</t></dd>
 <dd><t>Transport Layer Security</t></dd>
 </dl>
 </section>
-</section>
 
 <section>
-<name>Conventions</name>
-<t>The key words "<bcp14>MUST</bcp14>", "<bcp14>MUST NOT</bcp14>",
-"<bcp14>REQUIRED</bcp14>", "<bcp14>SHALL</bcp14>", "<bcp14>SHALL NOT</bcp14>",
-"<bcp14>SHOULD</bcp14>", "<bcp14>SHOULD NOT</bcp14>",
-"<bcp14>RECOMMENDED</bcp14>", "<bcp14>MAY</bcp14>",
-and "<bcp14>OPTIONAL</bcp14>" in this document are to be interpreted as
-described in <xref target='RFC2119'/>.</t>
-</section>
-
-<section>
-<name>DTLS Considerations</name>
+<name>DTLS 1.3 Considerations</name>
 
 <section>
 <name>Version of DTLS</name>
-<t>This document is based on <xref target='RFC4347'/>, and it
-is expected that DTLS/SCTP as described in this document will
-work with future versions of DTLS.</t>
+<t>This document is based on <xref target='RFC9147'/>.</t>
 </section>
 
 <section anchor="size">
 <name>Message Sizes</name>
-<t>DTLS limits the DTLS user message size to the current Path MTU
-minus the header sizes.
-For the purposes of running over SCTP, the DTLS path MTU <bcp14>MUST</bcp14> be
-considered to be 2<sup>14</sup>.</t>
+<t>DTLS limits the DTLS user message size to the current Path MTU minus
+the header sizes.
+For the purposes of running over SCTP, the DTLS Path MTU <bcp14>MUST</bcp14> be
+considered to be 2<sup>16</sup> utilizing the flags extension
+<xref target='I-D.ietf-tls-tlsflags'/> and <xref target='RFC8449'/>.</t>
+<t>The record_size_limit_64kb flag defined in this document is a short-
+hand version of conveying a value of 2<sup>16</sup> in the field of the
+RecordSizeLimit in the "record_size_limit" extension, which is
+defined in <xref target='RFC8449'/>.
+The flags extension, defined in <xref target='I-D.ietf-tls-tlsflags'/>, offers
+an indication that a certain optional feature is supported and is used instead
+of sending the "record_size_limit" extension for what is essentially 1-bit
+information.</t>
 </section>
 
 <section>
 <name>Replay Detection</name>
-<t>The replay detection of DTLS may result in the DTLS layer dropping messages.
+<t>The DTLS protocol allows two forms of replay protection:
+replay detection of handshake messages and
+replay detection of application data payloads.
+Handshake messages must be reliably transmitted and replay detection is
+essential.</t>
+<t>Contrary to handshake messages, detecting replays of application data
+messages is optional.
+If enabled, this replay detection may result in the DTLS layer dropping
+messages.
 Since DTLS/SCTP provides a reliable service if requested by the application,
 replay detection cannot be used.
-Therefore, replay detection of DTLS <bcp14>MUST NOT</bcp14> be used.</t>
+Therefore, replay detection for application data payloads of DTLS
+<bcp14>MUST NOT</bcp14> be used.</t>
 </section>
 
 <section>
 <name>Path MTU Discovery</name>
 <t>SCTP provides Path MTU discovery and fragmentation/reassembly for user
-messages. According to <xref target="size"/>, DTLS can send maximum sized
 messages.
-Therefore, Path MTU discovery of DTLS <bcp14>MUST NOT</bcp14> be used.</t>
+Since DTLS can send maximum sized messages Path MTU discovery of DTLS
+<bcp14>MUST NOT</bcp14> be used.</t>
+<t>Still, DTLS cannot completely ignore the PMTU for reasons mentioned
+in Section 4.4 of <xref target='RFC9147'/>.
+The DTLS record framing expands the datagram size, thus lowering the
+effective PMTU.</t> <!-- FIXME MT: Improve this -->
+<t>As recommended in Section 4.4 of <xref target='RFC9147'/>, the DTLS record
+layer <bcp14>SHOULD</bcp14> also allow the upper layer protocol to discover
+the amount of record expansion expected by the DTLS processing.</t>
 </section>
 
 <section>
 <name>Retransmission of Messages</name>
 <t>SCTP provides a reliable and in-sequence transport service for DTLS messages
-that require it. See <xref target="stream"/>.
-Therefore, DTLS procedures for retransmissions <bcp14>MUST NOT</bcp14> be
-used.</t>
+that require it.
+Therefore, DTLS procedures for retransmissions <bcp14>MUST NOT</bcp14> be used.
+For the DTLS stack the appearance is that there is no message loss and
+consequently no retransmission needed.</t>
+<!-- Dont fire timers! SCTP can take a longer time than needed -->
+</section>
+
+<section>
+<name>Exporter</name>
+<t>TLS defines an exporter interface, which is inherited by DTLS.
+In <xref target='RFC8446'/> the exporter values is computed as:</t>
+<sourcecode>
+TLS-Exporter(label, context_value, key_length) =
+    HKDF-Expand-Label(Derive-Secret(Secret, label, ""),
+                      "exporter", Hash(context_value), key_length)
+
+</sourcecode>
+<t>For use with this specification the label <bcp14>MUST</bcp14> be set to
+"EXPORTER_DTLS13_OVER_SCTP", an empty context_value field and a key length of
+64 bytes.</t>
+</section>
+
+<section>
+<name>Application Message Length</name>
+<t>The size of a DTLS record header depends on several factors, namely</t>
+<ul>
+<li><t>the use of the DTLS Connection ID (CID) feature,</t></li>
+<li><t>the size of the sequence number,</t></li>
+<li><t>the presence of the length field, and</t></li>
+<li><t>the use of padding to conceal the true message length.</t></li>
+</ul>
+<t>While the CID needs to be negotiated with the peer, the other parameters can
+be configured in DTLS stacks.
+The size of the records can, however, be influenced with the record size limit
+extension and the flags extension.</t>
+<t>Hence, an SCTP user application has a number of configuration options
+to adjust the use of DTLS to best fit a given deployment environment.</t>
 </section>
 </section>
 
@@ -229,9 +284,7 @@ used.</t>
 <section>
 <name>Mapping of DTLS Records</name>
 <t>The supported maximum length of SCTP user messages <bcp14>MUST</bcp14> be at
-least 2<sup>14</sup> + 2048 + 13 = 18445 bytes (2<sup>14</sup> + 2048 is the
-maximum length of the DTLSCiphertext.fragment, and 13 is the size of the
-DTLS record header).
+least the size of the maximum size of a DTLSCiphertext.
 In particular, the SCTP implementation <bcp14>MUST</bcp14> support fragmentation
 of user messages.</t>
 <t>Every SCTP user message <bcp14>MUST</bcp14> consist of exactly one DTLS
@@ -260,7 +313,7 @@ PPID is used.</t>
 
 <section anchor="stream">
 <name>Stream Usage</name>
-<t>All DTLS messages of the ChangeCipherSpec, Alert, or Handshake protocol
+<t>All DTLS messages except ApplicationData protocol messages
 <bcp14>MUST</bcp14> be transported on stream 0 with unlimited reliability and
 with the ordered delivery feature.</t>
 <t>DTLS messages of the ApplicationData protocol <bcp14>SHOULD</bcp14> use
@@ -272,55 +325,59 @@ minimizing head of line blocking.</t>
 <section>
 <name>Chunk Handling</name>
 <t>DATA chunks of SCTP <bcp14>MUST</bcp14> be sent in an authenticated way
-as described in <xref target='RFC4895'/>.
+as described in <xref target='I-D.tuexen-tsvwg-rfc4895-bis'/>.
 Other chunks <bcp14>MAY</bcp14> be sent in an authenticated way.
 This makes sure that an attacker cannot modify the stream in which a message
 is sent or affect the ordered/unordered delivery of the message.</t>
-<t>If PR-SCTP as defined in <xref target='RFC3758'/> is used,
-FORWARD-TSN chunks <bcp14>MUST</bcp14> also be sent in an authenticated way
-as described in <xref target='RFC4895'/>.
+<t>If PR-SCTP, as defined in <xref target='RFC3758'/>, is used,
+FORWARD-TSN chunks <bcp14>MUST</bcp14> also be sent in an authenticated way,
+as described in <xref target='I-D.tuexen-tsvwg-rfc4895-bis'/>.
 This makes sure that it is not possible for an attacker to drop messages and
 use forged FORWARD-TSN, SACK, and/or SHUTDOWN chunks to hide this dropping.</t>
 </section>
 
 <section>
-<name>Renegotiation</name>
-<t>DTLS supports renegotiation, and therefore this feature is also
-available by DTLS/SCTP.
-It is up to the upper layer to use/allow it or not.
-Application writers should be aware that allowing renegotiations may result in
-changes of security parameters.</t>
+<name>Post-Handshake Authentication</name>
+<t>DTLS supports post-handshake authentication, and therefore this
+feature is also available by DTLS/SCTP.
+It is up to the upper layer to use/allow it or not.</t>
+</section>
+
+<section>
+<name>Rekeying</name>
+<t>TLS 1.3 introduced the KeyUpdate message to indicate that the sender
+is updating its sending cryptographic keys.
+DTLS 1.3 consequently also supports this message.
+ In DTLS, an update of traffic keys requires the epoch value to be incremented.
+Since epoch values are not allowed to wrap, the maximum number of epoch updates
+is 2<sup>64</sup> (which includes epoch updates during the handshake
+itself).</t>
+<t>When the sender of the KeyUpdate message receives an ACK, it knows
+that it can safely switch from the old epoch to the new epoch.
+This is described in Section 8 of <xref target='RFC9147'/>.
+While DTLS 1.3 will make this switch automatically, the SCTP application using
+DTLS 1.3 for updating keys used by SCTP-AUTH requires updating keying material.
+While it is not required to keep the update of SCTP-AUTH keys in sync
+with the changes of keys at the DTLS layer, it is RECOMMENDED to
+switch keys for use with SCTP-AUTH once a KeyUpdate message has been
+successfully transmitted.</t>
+<!-- FIXME MT: This is missing details and might not be correct. -->
 </section>
 
 <section>
 <name>Handshake</name>
 <t>A DTLS implementation discards DTLS messages from older epochs
-after some time, as described in Section 4.1 of <xref target='RFC4347'/>.
-This is not acceptable when the DTLS user performs a reliable
-data transfer.
-To avoid discarding messages, the following procedures are required.</t>
-<t>Before sending a ChangeCipherSpec message, all outstanding
-SCTP user messages <bcp14>MUST</bcp14> have been acknowledged by the SCTP peer
-and <bcp14>MUST NOT</bcp14> be revoked by the SCTP peer.</t>
-<t>Prior to processing a received ChangeCipherSpec, all other
-received SCTP user messages that are buffered in the SCTP layer
-<bcp14>MUST</bcp14> be read and processed by DTLS.</t>
-<t>User messages that arrive between ChangeCipherSpec and Finished messages
-and use the new epoch have probably passed the Finished message
-and <bcp14>MUST</bcp14> be buffered by DTLS until the Finished message is
-read.</t>
+after some time, as described in <xref target='RFC9147'/>.
+This is not acceptable when a reliable data transfer is performed.</t>
+<!-- FIXME MT: This is missing details. -->
 </section>
 
 <section>
 <name>Handling of Endpoint-Pair Shared Secrets</name>
 <t>The endpoint-pair shared secret for Shared Key Identifier 0
 is empty and <bcp14>MUST</bcp14> be used when establishing a DTLS connection.
-Whenever the master key changes, a 64-byte shared
-secret is derived from every master secret and provided as a new
-endpoint-pair shared secret by using the exporter described
-in <xref target='RFC5705'/>.
-The exporter <bcp14>MUST</bcp14> use the label given in <xref target='iana'/>
-and no context.
+A new endpoint-pair shared secret MUST be established using the exporter
+interface defined in <xref target='RFC8446'/>, as described in Section 3.6.
 The new Shared Key Identifier <bcp14>MUST</bcp14> be the old Shared Key
 Identifier incremented by 1. If the old one is 65535, the new one
 <bcp14>MUST</bcp14> be 1.</t>
@@ -328,15 +385,34 @@ Identifier incremented by 1. If the old one is 65535, the new one
 <bcp14>MUST</bcp14> be switched to the new one.</t>
 <t>Once the corresponding Finished message from the peer has
 been received, the old SCTP-AUTH key <bcp14>SHOULD</bcp14> be removed.</t>
+<t>Since KeyUpdate messages are used to change the application traffic
+keys it is necessary to update the keying material initially exported
+via the TLS 1.3 exporter interface.</t>
+<t>The key derivation function MUST be used once the KeyUpdate has been
+transmitted successfully.
+The function follows the design of the exporter interface.</t>
+<sourcecode>
+Derive-Key(label, context_value, key_length) =
+    HKDF-Expand-Label(Derive-Secret(Secret, label, ""),
+                      "derive", Hash(context_value), key_length)
+</sourcecode>
+<t>For use with this specification the label MUST be set to
+"DERIVE_DTLS13_OVER_SCTP", a context_value field containing a 64 bit
+sequence number and a key length of 64 bytes.
+The 64 bit number logically corresponds to the epoch value but there is no
+requirement for the DTLS stack to expose the epoch value to this key derivation
+function interfacing the SCTP stack for setting the SCTP-AUTH keying
+material.
+The sequence number MUST be increased with every DTLS key update.</t>
 </section>
 
 <section>
 <name>Shutdown</name>
 <t>To prevent DTLS from discarding DTLS user messages while it is
-shutting down, a CloseNotify message <bcp14>MUST</bcp14> only be sent after
+shutting down, a close_notify alert <bcp14>MUST</bcp14> only be sent after
 all outstanding SCTP user messages have been acknowledged by the
 SCTP peer and <bcp14>MUST NOT</bcp14> still be revoked by the SCTP peer.</t>
-<t>Prior to processing a received CloseNotify, all other
+<t>Prior to processing a received close_notify, all other
 received SCTP user messages that are buffered in the SCTP layer
 <bcp14>MUST</bcp14> be read and processed by DTLS.</t>
 </section>
@@ -344,9 +420,19 @@ received SCTP user messages that are buffered in the SCTP layer
 
 <section anchor="iana">
 <name>IANA Considerations</name>
-<t>IANA added a value to the TLS Exporter Label registry
-as described in <xref target='RFC5705'/>.
-The label is "EXPORTER_DTLS_OVER_SCTP".</t>
+<t>IANA is asked to update in the the TLS Exporter Label registry,
+which was established in <xref target='RFC5705'/> and updated by
+<xref target='RFC8447'/>, the Reference of the label "EXPORTER_DTLS_OVER_SCTP"
+to this document.</t>
+<t>IANA is asked to add a value to the "tls_flags" registry created by
+<xref target='I-D.ietf-tls-tlsflags'/>:</t>
+<ul>
+<li><t>Value shall be TBD.</t></li>
+<li><t>Flag Name shall be record_size_limit_64kb.</t></li>
+<li><t>Message shall be RSL64.</t></li>
+<li><t>Recommended shall be set to no (N).</t></li>
+<li><t>Reference: [This RFC]</t></li>
+</ul>
 </section>
 
 <section>
@@ -354,7 +440,7 @@ The label is "EXPORTER_DTLS_OVER_SCTP".</t>
 <t>The security considerations given in
 <xref target='RFC4347'/>,
 <xref target='RFC4895'/>, and
-<xref target='RFC4960'/>
+<xref target='RFC9260'/>
 also apply to this document.</t>
 <t>It is possible to authenticate DTLS endpoints based on IP addresses
 in certificates.
@@ -372,13 +458,19 @@ Although DTLS can be used to provide privacy for the actual user message,
 none of these three are protected by DTLS.
 They are sent as clear text, because they are part of the SCTP DATA chunk
 header.</t>
-<t>DTLS supports cipher suites that contain a NULL cipher algorithm.
-Negotiating a NULL cipher algorithm will not provide communications privacy
-for applications and will not provide privacy for user messages.</t>
+<t>While TLS 1.3 reduced the number of supported cipher suites and removed a
+number of cipher suites, including all NULL cipher algorithm.
+However, <xref target='RFC9150'/> later re-introduced support for cipher suites
+that do not support confidentiality protection.
+Negotiating such cipher suites will not provide communications privacy for
+SCTP applications and will not provide privacy for user messages and
+<bcp14>MUST NOT</bcp14> be used with this specification.</t>
 </section>
 
 <section anchor="acks">
 <name>Acknowledgments</name>
+<t>The authors wish to thank Eric Rescorla and Robin Seggelmann for being
+coauthors on <xref target='RFC6083'/>, which is a basis of this document.</t>
 <t>The authors wish to thank
 Anna Brunstrom,
 Lars Eggert,
@@ -389,7 +481,11 @@ Carsten Hohendorf,
 Stefan Lindskog,
 Daniel Mentz,
 and Sean Turner
-for their invaluable comments.</t>
+for their invaluable comments on <xref target='RFC6083'/>.</t>
+<t>Finally, the authors wish to thank
+Eric Rescorla and
+Martin Thomson
+for his invaluable comments on this document.</t>
 </section>
 
 </middle>
@@ -403,14 +499,24 @@ for their invaluable comments.</t>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3758.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4347.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4895.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4960.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5705.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5763.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8449.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8447.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9147.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9150.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9260.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.tuexen-tsvwg-rfc4895-bis.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tls-tlsflags.xml"/>
 </references>
 <references>
 <name>Informative References</name>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.0793.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3436.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5061.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6083.xml"/>
 </references>
 </references>
 </back>
