@@ -340,6 +340,9 @@ use forged FORWARD-TSN, SACK, and/or SHUTDOWN chunks to hide this dropping.</t>
 <name>Post-Handshake Authentication</name>
 <t>For periodic re-authentication <xref target='RFC9261'/> <bcp14>MUST</bcp14>
 be used.</t>
+<t>A specific PPID is used to multiplex/de-multiplex user messages used for
+performing the procedures defined in <xref target='RFC9261'/> with other
+user messages.</t>
 </section>
 
 <section>
@@ -362,6 +365,10 @@ While it is not required to keep the update of SCTP-AUTH keys in sync
 with the changes of keys at the DTLS layer, it is RECOMMENDED to
 switch keys for use with SCTP-AUTH once a ExtendedKeyUpdate message has been
 successfully transmitted.</t>
+<t>A specific PPID is used to multiplex/de-multiplex user messages used for
+performing the procedures defined in
+<xref target='I-D.tschofenig-tls-extended-key-update'/> with other
+user messages.</t>
 <!-- FIXME MT: This is missing details and might not be correct. -->
 </section>
 
