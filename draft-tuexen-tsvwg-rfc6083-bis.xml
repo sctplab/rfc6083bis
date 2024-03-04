@@ -105,16 +105,14 @@ This specification supports:</t>
 <xref target='RFC5061'/>.</t></li>
 </ul>
 <t>The list above matches the design of DTLS over SCTP based on
-<xref target='RFC6083'/>.
-This specification relaxes the message size limitation:</t>
+<xref target='RFC6083'/>.</t>
+<t>This specification supports two ways of relaxing the message size
+limitation, which is imposed by the maximum plaintext record size
+of 2<sup>14</sup> bytes:</t>
 <ul>
-<li><t>The TLS protocol imposes a limit on the maximum record size, which is
-2<sup>14</sup> bytes although the length field of the protocol allows
-messages of 2<sup>16</sup> - 1 bytes.
-The record limit extension does, however, allow extensions to extend the
-maximum record size beyond 2<sup>14</sup> bytes.
-This document is such an extension and offers messages of 2<sup>16</sup> - 1
-bytes.</t></li>
+<li><t>Using DTLS extensions allows to bump this limit to 2<sup>16</sup> - 257 bytes.</t></li>
+<li><t>If only ordered and reliable messages are relevant, remove the limit at all
+by using a fragmentation and reassembly method making use of the Payload Protocol Identifier (PPID).</t></li>
 </ul>
 <t>However, the following limitation still apply:</t>
 <ul>
@@ -188,19 +186,20 @@ It is uniquely identified by a stream identifier.</t></dd>
 
 <section anchor="size">
 <name>Message Sizes</name>
-<t>DTLS limits the DTLS user message size to the current Path MTU minus
-the header sizes.
-For the purposes of running over SCTP, the DTLS Path MTU <bcp14>MUST</bcp14> be
-considered to be 2<sup>16</sup> utilizing the flags extension
-<xref target='I-D.ietf-tls-tlsflags'/> and <xref target='RFC8449'/>.</t>
-<t>The record_size_limit_64kb flag defined in this document is a short-
-hand version of conveying a value of 2<sup>16</sup> in the field of the
-RecordSizeLimit in the "record_size_limit" extension, which is
-defined in <xref target='RFC8449'/>.
-The flags extension, defined in <xref target='I-D.ietf-tls-tlsflags'/>, offers
-an indication that a certain optional feature is supported and is used instead
-of sending the "record_size_limit" extension for what is essentially 1-bit
-information.</t>
+<t>DTLS, as specified in <xref target='RFC9147'/>, limits the maximum plaintext
+record size to 2<sup>14</sup> bytes.</t>
+<t>If this limit is too restrictive, there are at least two options:</t>
+<ol>
+<li><t>To bump the maximum plaintext record size limit to 2<sup>16</sup> - 257 bytes,
+the "record_size_limit" extension, which is defined in <xref target='RFC8449'/>,
+<bcp14>MAY</bcp14> be used in combination with
+<xref target='I-D.ietf-tls-tlsflags'/> and
+<xref target='I-D.mattsson-tls-super-jumbo-record-limit'/>.</t></li>
+<li><t>If only ordered and reliable messages are relevant, the PPID based
+fragmentation and reassembly method specified in
+<xref target='I-D.tuexen-tsvwg-sctp-ppid-frag'/> <bcp14>MAY</bcp14> be used
+to remove the limit at all.</t></li>
+</ol>
 </section>
 
 <section>
@@ -424,15 +423,6 @@ received SCTP user messages that are buffered in the SCTP layer
 which was established in <xref target='RFC5705'/> and updated by
 <xref target='RFC8447'/>, the Reference of the label "EXPORTER_DTLS_OVER_SCTP"
 to this document.</t>
-<t>IANA is asked to add a value to the "tls_flags" registry created by
-<xref target='I-D.ietf-tls-tlsflags'/>:</t>
-<ul>
-<li><t>Value shall be TBD.</t></li>
-<li><t>Flag Name shall be record_size_limit_64kb.</t></li>
-<li><t>Message shall be RSL64.</t></li>
-<li><t>Recommended shall be set to no (N).</t></li>
-<li><t>Reference: [This RFC]</t></li>
-</ul>
 </section>
 
 <section>
@@ -510,10 +500,11 @@ for their invaluable comments on this document.</t>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9260.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tsvwg-rfc4895-bis.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tls-tlsflags.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.mattsson-tls-super-jumbo-record-limit"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.tuexen-tsvwg-sctp-ppid-frag"/>
 </references>
 <references>
 <name>Informative References</name>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.0793.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3436.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5061.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6083.xml"/>
