@@ -124,13 +124,13 @@ because this is done by the DTLS layer.</t></li>
 <t>DTLS establishes session keys for SCTP-AUTH in the same style as
 <xref target='RFC5763'/> defines how DTLS establishes keys for SRTP.
 This specification utilizes a new version of SCTP-AUTH, described in
-<xref target='I-D.tuexen-tsvwg-rfc4895-bis'/> utilizing modern cryptographic
+<xref target='I-D.ietf-tsvwg-rfc4895-bis'/> utilizing modern cryptographic
 algorithms.</t>
 
 <t>The method described in this document requires that the SCTP implementation
 supports the optional feature of fragmentation of SCTP user messages as
 defined in <xref target='RFC9260'/> and the SCTP authentication extension
-defined in <xref target='I-D.tuexen-tsvwg-rfc4895-bis'/>.</t>
+defined in <xref target='I-D.ietf-tsvwg-rfc4895-bis'/>.</t>
 <t>The design of this specification is based on the following principles:</t>
 <ul>
 <li><t>Re-use RFC 6083 as much as possible.  Large parts of RFC 6083 are
@@ -325,13 +325,13 @@ minimizing head of line blocking.</t>
 <section>
 <name>Chunk Handling</name>
 <t>DATA chunks of SCTP <bcp14>MUST</bcp14> be sent in an authenticated way
-as described in <xref target='I-D.tuexen-tsvwg-rfc4895-bis'/>.
+as described in <xref target='I-D.ietf-tsvwg-rfc4895-bis'/>.
 Other chunks <bcp14>MAY</bcp14> be sent in an authenticated way.
 This makes sure that an attacker cannot modify the stream in which a message
 is sent or affect the ordered/unordered delivery of the message.</t>
 <t>If PR-SCTP, as defined in <xref target='RFC3758'/>, is used,
 FORWARD-TSN chunks <bcp14>MUST</bcp14> also be sent in an authenticated way,
-as described in <xref target='I-D.tuexen-tsvwg-rfc4895-bis'/>.
+as described in <xref target='I-D.ietf-tsvwg-rfc4895-bis'/>.
 This makes sure that it is not possible for an attacker to drop messages and
 use forged FORWARD-TSN, SACK, and/or SHUTDOWN chunks to hide this dropping.</t>
 </section>
@@ -508,7 +508,7 @@ for their invaluable comments on this document.</t>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9147.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9150.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9260.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.tuexen-tsvwg-rfc4895-bis.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tsvwg-rfc4895-bis.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tls-tlsflags.xml"/>
 </references>
 <references>
