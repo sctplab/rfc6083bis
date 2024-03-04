@@ -190,9 +190,9 @@ It is uniquely identified by a stream identifier.</t></dd>
 record size to 2<sup>14</sup> bytes.</t>
 <t>If this limit is too restrictive, there are at least two options:</t>
 <ol>
-<li><t>To bump the maximum plaintext record size limit to 2<sup>16</sup> - 257 bytes,
-the "record_size_limit" extension, which is defined in <xref target='RFC8449'/>,
-<bcp14>MAY</bcp14> be used in combination with
+<li><t>To bump the maximum plaintext record size limit to
+2<sup>16</sup> - 257 bytes, the "record_size_limit" extension, which is defined
+in <xref target='RFC8449'/>, <bcp14>MAY</bcp14> be used in combination with
 <xref target='I-D.ietf-tls-tlsflags'/> and
 <xref target='I-D.mattsson-tls-super-jumbo-record-limit'/>.</t></li>
 <li><t>If only ordered and reliable messages are relevant, the PPID based
