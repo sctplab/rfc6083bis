@@ -34,11 +34,12 @@
 
 <!-- ************** HANNES TSCHOFENIG *************** -->
 <author initials="H." surname="Tschofenig" fullname="Hannes Tschofenig">
+<organization abbrev="H-BRS">University of Applied Sciences Bonn-Rhein-Sieg</organization>
 <address>
     <email>hannes.tschofenig@gmx.net</email>
 </address>
 </author>
-
+     
 <!-- ************** TIRUMALESWAR REDDY *************** -->
 <author initials="T." surname="Reddy" fullname="Tirumaleswar Reddy">
 <organization>Nokia</organization>
