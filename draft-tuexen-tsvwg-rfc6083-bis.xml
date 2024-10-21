@@ -38,6 +38,15 @@
     <email>hannes.tschofenig@gmx.net</email>
 </address>
 </author>
+
+<!-- ************** TIRUMALESWAR REDDY *************** -->
+<author initials="T." surname="Reddy" fullname="Tirumaleswar Reddy">
+<organization>Nokia</organization>
+<address>
+    <email>k.tirumaleswar_reddy@nokia.com</email>
+</address>
+</author>
+
 <date/>
 
 <abstract>
@@ -338,38 +347,30 @@ use forged FORWARD-TSN, SACK, and/or SHUTDOWN chunks to hide this dropping.</t>
 
 <section>
 <name>Post-Handshake Authentication</name>
-<t>For periodic re-authentication <xref target='RFC9261'/> <bcp14>MUST</bcp14>
-be used.</t>
+<t>If the SCTP peers require periodic re-authentication after DTLS handshake is complete to provide proof of ownership 
+of an updated identity (e.g., X.509 certificate), the mechanism defined in <xref target='RFC9261'/> MUST be leveraged by the 
+peers for mutual re-authentication. The application-layer protocol would have to be used to send the authenticator request, 
+either by the SCTP client or the SCTP server using the established DTLS connection.</t>
 <t>A specific PPID is used to multiplex/de-multiplex user messages used for
 performing the procedures defined in <xref target='RFC9261'/> with other
-user messages.</t>
+user messages.</t> 
+
 </section>
 
 <section>
 <name>Rekeying</name>
-<t><xref target='I-D.tschofenig-tls-extended-key-update'/> specifies the
-ExtendedKeyUpdate message to indicate that the sender is updating its sending
-cryptographic keys.
-DTLS 1.3 consequently also supports this message.
-In DTLS, an update of traffic keys requires the epoch value to be incremented.
-Since epoch values are not allowed to wrap, the maximum number of epoch updates
-is 2<sup>64</sup> (which includes epoch updates during the handshake
-itself).</t>
-<t>When the sender of the ExtendedKeyUpdate message receives an ACK, it knows
-that it can safely switch from the old epoch to the new epoch.
-This is described in Section 8 of <xref target='RFC9147'/> and
-<xref target='I-D.tschofenig-tls-extended-key-update'/>.
-While DTLS 1.3 will make this switch automatically, the SCTP application using
-DTLS 1.3 for updating keys used by SCTP-AUTH requires updating keying material.
-While it is not required to keep the update of SCTP-AUTH keys in sync
-with the changes of keys at the DTLS layer, it is RECOMMENDED to
-switch keys for use with SCTP-AUTH once a ExtendedKeyUpdate message has been
-successfully transmitted.</t>
-<t>A specific PPID is used to multiplex/de-multiplex user messages used for
-performing the procedures defined in
-<xref target='I-D.tschofenig-tls-extended-key-update'/> with other
-user messages.</t>
-<!-- FIXME MT: This is missing details and might not be correct. -->
+<t>The Extended Key Update mechanism for DTLS 1.3, defined in <xref target='I-D.ietf-tls-extended-key-update'/>, 
+specifies the ExtendedKeyUpdate message, which indicates that the sender wishes to update its 
+cryptographic keys to ensure forward secrecy. In DTLS, updating traffic keys requires the epoch value to 
+be incremented. Since epoch values cannot wrap, the maximum number of epoch updates is 2<sup>64</sup> 
+(this includes epoch updates during the handshake itself).</t>
+<t>When the sender of the ExtendedKeyUpdate message receives an ExtendedKeyUpdateResponse, it knows that it 
+can safely switch from the old epoch to the new epoch once the NewKeyUpdate message has been successfully transmitted. 
+This process is described in Section 8 of <xref target='RFC9147'/> and Section 8 of <xref target='I-D.ietf-tls-extended-key-update'/>. 
+While DTLS 1.3 will automatically perform this switch, the SCTP application using DTLS 1.3 for updating keys with 
+SCTP-AUTH requires updating of keying material. Although it is not mandatory to synchronize SCTP-AUTH key 
+updates with DTLS key changes, it is RECOMMENDED to switch keys for use with SCTP-AUTH once a NewKeyUpdate 
+message has been successfully transmitted.</t>
 </section>
 
 <section>
@@ -393,17 +394,12 @@ Identifier incremented by 1. If the old one is 65535, the new one
 <bcp14>MUST</bcp14> be switched to the new one.</t>
 <t>Once the corresponding Finished message from the peer has
 been received, the old SCTP-AUTH key <bcp14>SHOULD</bcp14> be removed.</t>
-<t>Since KeyUpdate messages are used to change the application traffic
+<t>Since ExtendedKeyUpdate messages are used to change the application traffic
 keys it is necessary to update the keying material initially exported
 via the TLS 1.3 exporter interface.</t>
-<t>The key derivation function MUST be used once the KeyUpdate has been
-transmitted successfully.
-The function follows the design of the exporter interface.</t>
-<sourcecode>
-Derive-Key(label, context_value, key_length) =
-    HKDF-Expand-Label(Derive-Secret(Secret, label, ""),
-                      "derive", Hash(context_value), key_length)
-</sourcecode>
+<t>The key derivation function MUST be used once the NewKeyUpdate has been
+transmitted successfully. The function follows the design of the exporter interface and deriving 
+the updated Exported Keying Material is discussed in Section 11 of <xref target='I-D.ietf-tls-extended-key-update'/>.</t>
 <t>For use with this specification the label MUST be set to
 "DERIVE_DTLS13_OVER_SCTP", a context_value field containing a 64 bit
 sequence number and a key length of 64 bytes.
@@ -511,7 +507,7 @@ for their invaluable comments on this document.</t>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tls-tlsflags.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.mattsson-tls-super-jumbo-record-limit"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.tuexen-tsvwg-sctp-ppid-frag"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.tschofenig-tls-extended-key-update"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tls-extended-key-update"/>
 </references>
 <references>
 <name>Informative References</name>
